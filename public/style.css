@@ -1,25 +1,20 @@
 body{
-
 background:#2b2d31;
 font-family:sans-serif;
 color:white;
 display:flex;
 justify-content:center;
 margin-top:100px;
-
 }
 
 .panel{
-
 background:#1e1f22;
 padding:30px;
 border-radius:12px;
 width:420px;
-
 }
 
 input,textarea,select{
-
 width:100%;
 margin-top:10px;
 margin-bottom:14px;
@@ -28,11 +23,9 @@ border:none;
 border-radius:8px;
 background:#313338;
 color:white;
-
 }
 
 button{
-
 width:100%;
 padding:12px;
 background:#5865F2;
@@ -40,5 +33,4 @@ border:none;
 border-radius:8px;
 color:white;
 font-size:16px;
-
 }
