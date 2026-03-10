@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Discord Ankündiger</title>
@@ -10,21 +10,24 @@
 
 <div class="panel">
 
-<h1>📢 Ankündigung senden</h1>
+<h1>📢 Ankündigung</h1>
 
 <label>Channel</label>
 <select id="channels"></select>
 
-<label>Rolle ping</label>
+<label>Rolle</label>
 <select id="roles">
-<option value="">keine</option>
+<option value="">Keine</option>
 </select>
 
 <label>Titel</label>
 <input id="title">
 
-<label>Nachricht</label>
+<label>Text</label>
 <textarea id="message"></textarea>
+
+<label>Bild URL</label>
+<input id="image">
 
 <button onclick="send()">Senden</button>
 
