@@ -8,6 +8,8 @@ app.use(cors())
 app.use(express.json())
 app.use(express.static("public"))
 
+const GUILD_ID = process.env.GUILD_ID
+
 app.get("/ping",(req,res)=>{
 res.send("alive")
 })
@@ -16,19 +18,19 @@ app.get("/data", async (req,res)=>{
 
 try{
 
-const guild = client.guilds.cache.first()
+const guild = await client.guilds.fetch(GUILD_ID)
 
-await guild.channels.fetch()
-await guild.roles.fetch()
+const channels = await guild.channels.fetch()
+const roles = await guild.roles.fetch()
 
-const channels = guild.channels.cache
+const channelList = channels
 .filter(c => c.type === 0)
 .map(c => ({
 id:c.id,
 name:c.name
 }))
 
-const roles = guild.roles.cache
+const roleList = roles
 .filter(r => r.name !== "@everyone")
 .map(r => ({
 id:r.id,
@@ -36,13 +38,13 @@ name:r.name
 }))
 
 res.json({
-channels,
-roles
+channels:channelList,
+roles:roleList
 })
 
-}catch(e){
+}catch(err){
 
-console.log(e)
+console.log(err)
 
 res.json({
 channels:[],
@@ -55,46 +57,29 @@ roles:[]
 
 app.post("/send", async (req,res)=>{
 
-const {channel,role,title,message,image} = req.body
+const {channel,role,title,message} = req.body
 
 const ch = await client.channels.fetch(channel)
 
-let ping = ""
-
-if(role){
-ping = `<@&${role}>`
-}
-
 await ch.send({
 
-content: ping,
+content: role ? `<@&${role}>` : "",
 
 embeds:[
 {
-
 title:title,
-
 description:message,
-
-color:5865,
-
-image:{
-url:image
+color:5865F2,
+thumbnail:{
+url:"https://i.imgur.com/AfFp7pu.png"
 },
-
-fields:[
-{
-name:"🔗 Links",
-value:"[🌐 Webseite](https://example.com) | [📜 Regeln](https://example.com/regeln)"
-}
-],
-
+image:{
+url:"https://i.imgur.com/ZGp9sRk.png"
+},
 footer:{
 text:"Server Ankündigung"
 },
-
 timestamp:new Date()
-
 }
 ]
 
@@ -107,5 +92,5 @@ res.json({success:true})
 const PORT = process.env.PORT || 3000
 
 app.listen(PORT,()=>{
-console.log("Panel läuft")
+console.log("Panel gestartet")
 })
