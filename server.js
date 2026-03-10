@@ -1,96 +1,119 @@
-const express = require("express")
-const cors = require("cors")
-const client = require("./bot")
+const express = require("express");
+const cors = require("cors");
+const multer = require("multer");
+const client = require("./bot");
 
-const app = express()
+const app = express();
 
-app.use(cors())
-app.use(express.json())
-app.use(express.static("public"))
+const upload = multer({ storage: multer.memoryStorage() });
 
-const GUILD_ID = process.env.GUILD_ID
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public"));
 
-app.get("/ping",(req,res)=>{
-res.send("alive")
-})
+const GUILD_ID = process.env.GUILD_ID;
 
-app.get("/data", async (req,res)=>{
+app.get("/ping", (req, res) => {
+  res.send("alive");
+});
 
-try{
+app.get("/data", async (req, res) => {
 
-const guild = await client.guilds.fetch(GUILD_ID)
+  try {
 
-const channels = await guild.channels.fetch()
-const roles = await guild.roles.fetch()
+    const guild = await client.guilds.fetch(GUILD_ID);
 
-const channelList = channels
-.filter(c => c.type === 0)
-.map(c => ({
-id:c.id,
-name:c.name
-}))
+    const channels = await guild.channels.fetch();
+    const roles = await guild.roles.fetch();
 
-const roleList = roles
-.filter(r => r.name !== "@everyone")
-.map(r => ({
-id:r.id,
-name:r.name
-}))
+    const channelList = channels
+      .filter(c => c.type === 0)
+      .map(c => ({
+        id: c.id,
+        name: c.name
+      }));
 
-res.json({
-channels:channelList,
-roles:roleList
-})
+    const roleList = roles
+      .filter(r => r.name !== "@everyone")
+      .map(r => ({
+        id: r.id,
+        name: r.name
+      }));
 
-}catch(err){
+    res.json({
+      channels: channelList,
+      roles: roleList
+    });
 
-console.log(err)
+  } catch (err) {
 
-res.json({
-channels:[],
-roles:[]
-})
+    console.log(err);
 
-}
+    res.json({
+      channels: [],
+      roles: []
+    });
 
-})
+  }
 
-app.post("/send", async (req,res)=>{
+});
 
-const {channel,role,title,message} = req.body
+app.post("/send", upload.single("image"), async (req, res) => {
 
-const ch = await client.channels.fetch(channel)
+  try {
 
-await ch.send({
+    const { channel, role, title, message } = req.body;
 
-content: role ? `<@&${role}>` : "",
+    const ch = await client.channels.fetch(channel);
 
-embeds:[
-{
-title:title,
-description:message,
-color:5865F2,
-thumbnail:{
-url:"https://i.imgur.com/AfFp7pu.png"
-},
-image:{
-url:"https://i.imgur.com/ZGp9sRk.png"
-},
-footer:{
-text:"Server Ankündigung"
-},
-timestamp:new Date()
-}
-]
+    const files = [];
 
-})
+    if (req.file) {
+      files.push({
+        attachment: req.file.buffer,
+        name: req.file.originalname
+      });
+    }
 
-res.json({success:true})
+    await ch.send({
 
-})
+      content: role ? `<@&${role}>` : "",
 
-const PORT = process.env.PORT || 3000
+      embeds: [
+        {
+          title: title,
+          description: message,
+          color: 5865,
 
-app.listen(PORT,()=>{
-console.log("Panel gestartet")
-})
+          thumbnail: {
+            url: "https://i.imgur.com/AfFp7pu.png"
+          },
+
+          footer: {
+            text: "Server Ankündigung"
+          },
+
+          timestamp: new Date()
+        }
+      ],
+
+      files: files
+
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+
+    console.log(err);
+    res.json({ success: false });
+
+  }
+
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Panel gestartet");
+});
